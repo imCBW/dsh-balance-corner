@@ -1,8 +1,12 @@
 # dsh-balance-corner
 
-DeepSeek 账号余额显示在侧边栏左下角账号行的最右端——只显示金额，例如 `¥43.52`。
+**只做一件事：显示余额。** 没有别的功能，也不占新的地方——不长出面板、不新占一行、不塞额外按钮，只是把金额填进侧边栏账号行右边本来就空着的那点位置。抬眼即见，不打断手上任何操作。
 
-A DeepSeek account balance in the bottom-left account row of the DSH sidebar. One amount, no label.
+**It does one thing: show the balance.** Nothing else, and no extra real estate — no panel, no extra row, no added chrome; it only fills the empty space on the right of the sidebar's account row. Glance and go, without interrupting anything you are doing.
+
+DeepSeek 账号余额显示在侧边栏左下角账号行的最右端，例如 `¥43.52`。
+
+A DeepSeek account balance at the right end of the sidebar's account row — for example `¥43.52`.
 
 ![余额显示在侧边栏左下角账号行最右端](https://raw.githubusercontent.com/imCBW/dsh-balance-corner/main/docs/balance.png?v=2)
 
