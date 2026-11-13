@@ -8,7 +8,7 @@ A DeepSeek account balance in the bottom-left account row of the DSH sidebar. On
 
 在 DSH 里的整体位置（红框处就是余额；对话内容与头像已打码）：
 
-![整体位置：红框处为侧边栏账号行最右端的余额](https://raw.githubusercontent.com/imCBW/dsh-balance-corner/main/docs/overview.png?v=1)
+![整体位置：红框处为侧边栏账号行最右端的余额](https://raw.githubusercontent.com/imCBW/dsh-balance-corner/main/docs/overview.png?v=2)
 
 ## 它是什么
 
