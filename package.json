@@ -1,0 +1,51 @@
+{
+  "name": "dsh-balance-corner",
+  "version": "1.0.0",
+  "description": "DeepSeek account balance at the right end of the sidebar's account row: one amount, click to open usage or top up.",
+  "type": "module",
+  "license": "MIT",
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "deepseek-harness",
+    "balance",
+    "billing",
+    "sidebar"
+  ],
+  "exports": {
+    ".": "./index.js",
+    "./client": "./client.js",
+    "./locale/*.json": "./locale/*.json",
+    "./icon": "./icon.svg"
+  },
+  "files": [
+    "index.js",
+    "client.js",
+    "cordis.patch.yml",
+    "locale/*.json",
+    "icon.svg"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "immediately": true,
+      "inject": [
+        "@deepseek-ai/dsh-client-ui-conversation"
+      ]
+    }
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/imCBW/dsh-balance-corner.git"
+  },
+  "homepage": "https://github.com/imCBW/dsh-balance-corner#readme",
+  "bugs": {
+    "url": "https://github.com/imCBW/dsh-balance-corner/issues"
+  }
+}
