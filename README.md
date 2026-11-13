@@ -4,6 +4,8 @@ DeepSeek 账号余额显示在侧边栏左下角账号行的最右端——只�
 
 A DeepSeek account balance in the bottom-left account row of the DSH sidebar. One amount, no label.
 
+![余额显示在侧边栏左下角账号行最右端](https://raw.githubusercontent.com/imCBW/dsh-balance-corner/main/docs/balance.png)
+
 ## 它是什么
 
 - **位置**：侧边栏页脚、账号（头像）那一行的最右端，和头像同一行。
