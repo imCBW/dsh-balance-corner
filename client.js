@@ -281,6 +281,53 @@ window.__ModuleLoader__.load({
           return { balance: balance.value, links: links ?? null }
         }
 
+        /**
+         * Route prefix under the page's own `<base href>`, the same one the ego
+         * plugin's client uses for its `/api/ego/*` calls, so a reverse-proxy
+         * mount keeps working.
+         * @returns the prefix, or an empty string at the origin root.
+         */
+        const apiBase = () => {
+          try {
+            const base = document.querySelector('base[href]')
+            if (base === null) return ''
+            const path = new URL(base.getAttribute('href') || './', document.baseURI).pathname.replace(/\/+$/, '')
+            return path === '/' ? '' : path
+          } catch {
+            return ''
+          }
+        }
+
+        /** The agent-browser tab kind the ego plugin registers into the right sidebar. */
+        const EGO_PANEL_KIND = 'ego-browser:watch'
+
+        /**
+         * Hand the URL to the ego-browser plugin so the page opens in the agent
+         * browser (which carries the imported Chrome login), instead of the
+         * in-app tab. Reveal its side panel first so the page lands somewhere
+         * visible; every step is best effort.
+         * @param url - page to open.
+         * @returns whether ego accepted the navigation.
+         */
+        const openInEgoBrowser = async (url) => {
+          try {
+            const sidebar = typeof ctx.get === 'function' ? ctx.get('sidebarRight') : undefined
+            try {
+              if (sidebar !== null && sidebar !== undefined && typeof sidebar.openTab === 'function') sidebar.openTab(EGO_PANEL_KIND)
+            } catch {}
+            const res = await fetch(apiBase() + '/api/ego/navigate', {
+              method: 'POST',
+              headers: { 'content-type': 'application/json' },
+              body: JSON.stringify({ url })
+            })
+            if (!res.ok) return false
+            const data = await res.json().catch(() => null)
+            return data === null || data.ok !== false
+          } catch {
+            return false
+          }
+        }
+
         /** Open a platform page the way the rest of the client does: in-app tab first. */
         const openUrl = (url) => {
           if (typeof url !== 'string' || url === '') return
@@ -380,7 +427,12 @@ window.__ModuleLoader__.load({
               return
             }
             const links = snapshot.links ?? FALLBACK_LINKS
-            openUrl(low ? links.topUpUrl : links.usageUrl)
+            const target = low ? links.topUpUrl : links.usageUrl
+            // Prefer the agent browser (ego plugin) so the platform page opens
+            // with the imported Chrome login; fall back to the in-app tab.
+            void openInEgoBrowser(target).then((opened) => {
+              if (!opened) openUrl(target)
+            })
           }
 
           const chip = h(
