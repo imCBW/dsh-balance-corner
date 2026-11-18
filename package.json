@@ -1,6 +1,6 @@
 {
   "name": "dsh-balance-corner",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "DeepSeek account balance at the right end of the sidebar's account row: one amount, click to open usage or top up.",
   "type": "module",
   "license": "MIT",

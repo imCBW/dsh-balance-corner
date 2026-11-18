@@ -302,23 +302,17 @@ window.__ModuleLoader__.load({
         const EGO_PANEL_KIND = 'ego-browser:watch'
 
         /**
-         * Hand the URL to the ego-browser plugin so the page opens in the agent
-         * browser (which carries the imported Chrome login), instead of the
-         * in-app tab. Reveal its side panel first so the page lands somewhere
-         * visible; every step is best effort.
-         * @param url - page to open.
-         * @returns whether ego accepted the navigation.
+         * POST one ego control route and report whether it accepted the call.
+         * @param path - route under the ego prefix.
+         * @param body - JSON payload.
+         * @returns true only when the route answered ok.
          */
-        const openInEgoBrowser = async (url) => {
+        const postEgo = async (path, body) => {
           try {
-            const sidebar = typeof ctx.get === 'function' ? ctx.get('sidebarRight') : undefined
-            try {
-              if (sidebar !== null && sidebar !== undefined && typeof sidebar.openTab === 'function') sidebar.openTab(EGO_PANEL_KIND)
-            } catch {}
-            const res = await fetch(apiBase() + '/api/ego/navigate', {
+            const res = await fetch(apiBase() + path, {
               method: 'POST',
               headers: { 'content-type': 'application/json' },
-              body: JSON.stringify({ url })
+              body: JSON.stringify(body)
             })
             if (!res.ok) return false
             const data = await res.json().catch(() => null)
@@ -326,6 +320,38 @@ window.__ModuleLoader__.load({
           } catch {
             return false
           }
+        }
+
+        /** Reveal the agent-browser panel so the page is visible where it opened. */
+        const revealEgoPanel = () => {
+          try {
+            const sidebar = typeof ctx.get === 'function' ? ctx.get('sidebarRight') : undefined
+            if (sidebar !== null && sidebar !== undefined && typeof sidebar.openTab === 'function') sidebar.openTab(EGO_PANEL_KIND)
+          } catch {}
+        }
+
+        /**
+         * Hand the URL to the ego-browser plugin so the page opens in its agent
+         * browser (which carries the imported Chrome login) instead of the
+         * in-app tab.
+         *
+         * Three routes, in order: `navigate` (needs a live watch lease, the
+         * cheap path once the panel is up), `open-window` (runs an ego script
+         * through the executor and needs no panel at all), then `navigate`
+         * again after a short wait (covers a cold cast-worker start).
+         * @param url - page to open.
+         * @returns whether ego took the URL.
+         */
+        const openInEgoBrowser = async (url) => {
+          revealEgoPanel()
+          let opened = await postEgo('/api/ego/navigate', { url })
+          if (!opened) opened = await postEgo('/api/ego/open-window', { url })
+          if (!opened) {
+            await new Promise((resolve) => setTimeout(resolve, 2500))
+            opened = await postEgo('/api/ego/navigate', { url })
+          }
+          if (opened) revealEgoPanel()
+          return opened
         }
 
         /** Open a platform page the way the rest of the client does: in-app tab first. */

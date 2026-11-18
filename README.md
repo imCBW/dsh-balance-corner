@@ -19,7 +19,8 @@ A DeepSeek account balance at the right end of the sidebar's account row — for
 - **位置**：侧边栏页脚、账号（头像）那一行的最右端，和头像同一行。
 - **内容**：充值余额（人民币优先，没有人民币时显示第一个钱包）。
 - **悬停**：充值余额、赠金余额、更新时间；余额不足时提示去充值，正常时提示点击查看用量。
-- **点击**：交给 **ego 浏览器插件**（`dsh-ego-browser`）在它的 Agent 浏览器里打开平台用量页——那里带着你导入的 Chrome 登录态，余额和充值页直接就是登录后的样子；同时会把右侧的 Agent 浏览器面板露出来。没装 ego、或它拒绝（画面回传被关掉等）时，自动回退到右侧内置浏览器打开。余额不足时打开充值页；读取失败时点击表示重试。
+- **点击**：交给 **ego 浏览器插件**（`dsh-ego-browser`）在它的 Agent 浏览器里打开平台用量页——那里带着你导入的 Chrome 登录态。没装 ego、或三条路由都不通时，自动回退到右侧内置浏览器。余额不足时打开充值页；读取失败时点击表示重试。
+  - 第一次用要在 Agent 浏览器里登录一次 `platform.deepseek.com`（面板上的「复用 Chrome 登录态」可以一键带过来）；登录态存在 ego 的持久 profile 里，之后不会再问。
 - **< 5 元**：金额变黄，点击直接去充值。
 - **不显示**：账号未登录，或当前用的是 API Key 而不是 DeepSeek 账号；侧边栏收成窄栏时也不显示。
 
@@ -44,7 +45,7 @@ dsh plugin add dsh-balance-corner
 - 宿主槽位 `sidebar.footer.action` 只用来拿一个稳定的挂载点；芯片本身用 `react-dom` 的 `createPortal` 挂到账号行元素末尾（`[class*="_triggerRow"]`，退化为 `button[aria-haspopup="dialog"]` 的父元素），因为账号行是 shell 写死的 `[设置触发器][连接指示灯][更新角标]`，没有尾部插槽。
 - 账号行会被 shell 重渲染替换，组件每 2 秒检查挂载点是否还连着 DOM，掉了就重挂；一直找不到就退回显示在页脚行。
 - 客户端插件访问 Remote 必须同时注入 `remote` 和 `remote.account`，否则会报 `cannot get property "remote" without inject`。
-- 与 ego 的绑走的是它自己的 HTTP 路由：`POST /api/ego/navigate {url}`，路径前缀取页面 `<base href>`（与 ego 客户端同一套算法，反代挂子路径时不失效）；先 `sidebarRight.openTab('ego-browser:watch')` 把面板露出来。任何一步失败（路由 404、`ok:false`、网络异常）都落到内置浏览器那条旧路径，所以没装 ego 的用户行为不变。
+- 与 ego 的绑定走它自己的 HTTP 路由，按顺序试三条：`POST /api/ego/navigate`（需要观察窗正在 watch，面板开着时最快）→ `POST /api/ego/open-window`（走 executor 跑一段 ego 脚本，不依赖面板，会新开一个真实窗口）→ 2.5 秒后再试一次 `navigate`（覆盖 cast worker 冷启动）。路径前缀取页面 `<base href>`（与 ego 客户端同一套算法，反代挂子路径时不失效）。成功后会 `sidebarRight.openTab('ego-browser:watch')` 把面板露出来。任何一步都不成（路由 404、`ok:false`、网络异常）都落到内置浏览器那条旧路径，所以没装 ego 的用户行为不变。
 - 因此这个插件对 DSH 的账号行 DOM 结构有依赖。将来大改版若换了结构，它会退回页脚显示而不是消失。
 
 ## 边界
